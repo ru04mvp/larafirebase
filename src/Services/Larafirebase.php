@@ -32,7 +32,7 @@ class Larafirebase
 
     private $fromRaw;
 
-    const API_URI = 'https://fcm.googleapis.com/fcm/send';
+    const API_URI = 'https://fcm.googleapis.com/v1/projects/ctinews-348407/messages:send';
 
     public function withTitle($title)
     {
@@ -121,10 +121,10 @@ class Larafirebase
                 'image' => $this->image,
                 'icon' => $this->icon,
                 'sound' => $this->sound,
-                'click_action' => $this->clickAction
+                'click_action' => $this->clickAction,
             ],
             'data' => $this->additionalData,
-            'priority' => $this->priority
+            'priority' => $this->priority,
         );
 
         return $this->callApi($fields);
@@ -154,10 +154,10 @@ class Larafirebase
 
     private function callApi($fields): Response
     {
-        $authenticationKey = isset($this->authenticationKey) ? $this->authenticationKey:config('larafirebase.authentication_key');
+        $authenticationKey = isset($this->authenticationKey) ? $this->authenticationKey : config('larafirebase.authentication_key');
 
         $response = Http::withHeaders([
-            'Authorization' => 'key=' . $authenticationKey
+            'Authorization' => 'Bearer ' . $authenticationKey,
         ])->post(self::API_URI, $fields);
 
         return $response;

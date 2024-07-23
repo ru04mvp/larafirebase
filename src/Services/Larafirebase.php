@@ -117,7 +117,7 @@ class Larafirebase
         }
 
         $fields = [
-            "validate_only" => true,
+            "validate_only" => false,
             "message" => [
                 'data' => $this->additionalData,
                 'notification' => ($this->fromArray) ? $this->fromArray : [

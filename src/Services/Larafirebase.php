@@ -2,8 +2,7 @@
 
 namespace Kutia\Larafirebase\Services;
 
-use Illuminate\Http\Client\Response;
-use Illuminate\Support\Facades\Http;
+use App\Library\GoogleTools;
 use Kutia\Larafirebase\Exceptions\UnsupportedTokenFormat;
 
 class Larafirebase
@@ -113,19 +112,22 @@ class Larafirebase
 
     public function sendNotification($tokens)
     {
-        $fields = array(
-            'registration_ids' => $this->validateToken($tokens),
-            'notification' => ($this->fromArray) ? $this->fromArray : [
-                'title' => $this->title,
-                'body' => $this->body,
-                'image' => $this->image,
-                'icon' => $this->icon,
-                'sound' => $this->sound,
-                'click_action' => $this->clickAction,
+        if (is_array($tokens) and count($tokens) !== 1) {
+            return false;
+        }
+
+        $fields = [
+            "validate_only" => true,
+            "message" => [
+                'data' => $this->additionalData,
+                'notification' => ($this->fromArray) ? $this->fromArray : [
+                    'title' => $this->title,
+                    'body' => $this->body,
+                    'image' => $this->image,
+                ],
+                'token' => $tokens[0],
             ],
-            'data' => $this->additionalData,
-            'priority' => $this->priority,
-        );
+        ];
 
         return $this->callApi($fields);
     }
@@ -152,13 +154,20 @@ class Larafirebase
         return $this->callApi($this->fromRaw);
     }
 
-    private function callApi($fields): Response
+    private function callApi($fields)
     {
-        $authenticationKey = isset($this->authenticationKey) ? $this->authenticationKey : config('larafirebase.authentication_key');
 
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $authenticationKey,
-        ])->post(self::API_URI, $fields);
+        echo "=> 發送資料: " . json_encode($fields) . PHP_EOL;
+
+        $GoogleTools = new GoogleTools;
+        $GoogleTools->initializeGoogleServiceAccount('main');
+        $response = $GoogleTools->UseApiPointer("POST", self::API_URI, $fields);
+
+        // $authenticationKey = isset($this->authenticationKey) ? $this->authenticationKey : config('larafirebase.authentication_key');
+
+        // $response = Http::withHeaders([
+        //     'Authorization' => 'Bearer ' . $authenticationKey,
+        // ])->post(self::API_URI, $fields);
 
         return $response;
     }

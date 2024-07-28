@@ -2,7 +2,6 @@
 
 namespace Kutia\Larafirebase\Services;
 
-use App\Library\GoogleTools;
 use Kutia\Larafirebase\Exceptions\UnsupportedTokenFormat;
 
 class Larafirebase
@@ -31,7 +30,14 @@ class Larafirebase
 
     private $fromRaw;
 
+    protected $GoogleTools;
+
     const API_URI = 'https://fcm.googleapis.com/v1/projects/ctinews-348407/messages:send';
+
+    public function withGoogleTools($GoogleTools)
+    {
+        $this->GoogleTools = $GoogleTools;
+    }
 
     public function withTitle($title)
     {
@@ -156,20 +162,8 @@ class Larafirebase
 
     private function callApi($fields)
     {
-
-        echo "=> 發送資料: " . json_encode($fields) . PHP_EOL;
-
-        $GoogleTools = new GoogleTools;
-        $GoogleTools->initializeGoogleServiceAccount('main');
-        $response = $GoogleTools->UseApiPointer("POST", self::API_URI, $fields);
-
-        // $authenticationKey = isset($this->authenticationKey) ? $this->authenticationKey : config('larafirebase.authentication_key');
-
-        // $response = Http::withHeaders([
-        //     'Authorization' => 'Bearer ' . $authenticationKey,
-        // ])->post(self::API_URI, $fields);
-
-        return $response;
+        // echo "=> 發送資料: " . json_encode($fields) . PHP_EOL;
+        return $this->GoogleTools->UseApiPointer("POST", self::API_URI, $fields);
     }
 
     private function validateToken($tokens)
